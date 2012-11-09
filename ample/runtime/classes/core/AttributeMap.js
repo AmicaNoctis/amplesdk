@@ -8,18 +8,19 @@
  */
 
 var cAttributeMap	= function(oElement){
-	this.ownerElement = oElement;
+	this.$ownerElement = oElement;
 };
 cAttributeMap.prototype = new Object();
-cAttributeMap.prototype.length = 0;
+cAttributeMap.prototype.$length = 0;
+cAttributeMap.prototype.$ownerElement = null;
 cAttributeMap.prototype.getLength = function () {
 	var sName;
 	for (sName in this) {
 		if (this.hasOwnProperty(sName)) {
-			this.length++;
+			this.$length++;
 		}
 	}
-	return this.length;
+	return this.$length;
 };
 cAttributeMap.prototype.getNamedItem = function (sName) {
 	var sLocalName = sName,
@@ -29,10 +30,10 @@ cAttributeMap.prototype.getNamedItem = function (sName) {
 		if (aMatches = sName.match(/^(.+):(.+)$/)) {
 			sLocalName = aMatches[2];
 			sPrefix = aMatches[1];
-			sNsUri = this.ownerElement.lookupNamespaceURI(sPrefix);
+			sNsUri = this.$ownerElement.lookupNamespaceURI(sPrefix);
 		}
 		else {
-			sNsUri = this.ownerElement.namespaceURI;
+			sNsUri = this.$ownerElement.namespaceURI;
 		}
 		oAttribute = new ample.classes.Attr();
 		oAttribute.localName = sLocalName;
@@ -41,7 +42,7 @@ cAttributeMap.prototype.getNamedItem = function (sName) {
 		oAttribute.nodeName = sName;
 		oAttribute.nodeValue = this[sName];
 		oAttribute.ownerDocument = ample;
-		oAttribute.ownerElement = this.ownerElement;
+		oAttribute.ownerElement = this.$ownerElement;
 		oAttribute.prefix = sPrefix;
 		oAttribute.specified = true;
 		oAttribute.textContent = this[sName];
@@ -51,11 +52,23 @@ cAttributeMap.prototype.getNamedItem = function (sName) {
 	return null;
 }
 cAttributeMap.prototype.getNamedItemNS = function (sNamespaceURI, sLocalName) {
-	var sPrefix = this.ownerElement.namespaceURI === sNamespaceURI
+	var sPrefix = this.$ownerElement.namespaceURI === sNamespaceURI
 		? null
-		: this.ownerElement.lookupPrefix(sNamespaceURI);
+		: this.$ownerElement.lookupPrefix(sNamespaceURI);
 	return this.getNamedItem((sPrefix ? sPrefix + ":" : "") + sLocalName);
 }
+cAttributeMap.prototype.hasOwnProperty = function (sName) {
+	switch (sName) {
+		case "$length":
+		case "$ownerElement":
+		case "getLength":
+		case "getNamedItem":
+		case "getNamedItemNS":
+		case "hasOwnProperty":
+		case "item": return false;
+		default: return Object.prototype.hasOwnProperty.apply(this, arguments);
+	}
+};
 cAttributeMap.prototype.item = function (nIndex) {
 	var sName;
 	for (sName in this) {
