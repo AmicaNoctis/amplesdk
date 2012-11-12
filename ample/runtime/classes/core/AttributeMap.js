@@ -11,17 +11,7 @@ var cAttributeMap	= function(oElement){
 	this.$ownerElement = oElement;
 };
 cAttributeMap.prototype = new Object();
-cAttributeMap.prototype.$length = 0;
 cAttributeMap.prototype.$ownerElement = null;
-cAttributeMap.prototype.getLength = function () {
-	var sName;
-	for (sName in this) {
-		if (this.hasOwnProperty(sName)) {
-			this.$length++;
-		}
-	}
-	return this.$length;
-};
 cAttributeMap.prototype.getNamedItem = function (sName) {
 	var sLocalName = sName,
 		sPrefix = null,
@@ -59,23 +49,10 @@ cAttributeMap.prototype.getNamedItemNS = function (sNamespaceURI, sLocalName) {
 }
 cAttributeMap.prototype.hasOwnProperty = function (sName) {
 	switch (sName) {
-		case "$length":
 		case "$ownerElement":
-		case "getLength":
 		case "getNamedItem":
 		case "getNamedItemNS":
-		case "hasOwnProperty":
-		case "item": return false;
+		case "hasOwnProperty": return false;
 		default: return Object.prototype.hasOwnProperty.apply(this, arguments);
 	}
 };
-cAttributeMap.prototype.item = function (nIndex) {
-	var sName;
-	for (sName in this) {
-		if (this.hasOwnProperty(sName)) {
-			if (nIndex === 0) return this[sName];
-			nIndex--;
-		}
-	}
-	return null;
-}
