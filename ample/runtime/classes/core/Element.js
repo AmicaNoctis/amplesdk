@@ -184,36 +184,33 @@ function fElement_replaceChild(oParent, oNode, oOld) {
 };
 
 cElement.prototype.replaceChild	= function(oNode, oOld) {
-	var oNextSibling;
 //->Guard
 	fGuard(arguments, [
 		["node",	cNode],
-		["old",		cNode, false, true]
+		["old",		cNode]
 	], this);
 //<-Guard
 
-	if (oOld) {
-		if (this.childNodes.$indexOf(oOld) !=-1) {
-			oNextSibling = oOld.nextSibling;
-			fElement_removeChild(this, oOld);
-			if (oNextSibling) {
-				if (oNode.nodeType == 11)	// cNode.DOCUMENT_FRAGMENT_NODE
-					while (oNode.firstChild)
-						fElement_insertBefore(this, oNode.firstChild, oNextSibling);
+	if (this.childNodes.$indexOf(oOld) !=-1) {
+		var oBefore	= oOld.nextSibling;
+		// First remove node
+		fElement_removeChild(this, oOld);
+		//
+		if (oNode.nodeType == 11) {	// cNode.DOCUMENT_FRAGMENT_NODE
+			while (oNode.firstChild)
+				if (oBefore)
+					fElement_insertBefore(this, oNode.firstChild, oBefore);
 				else
-					fElement_insertBefore(this, oNode, oNextSibling);
-			}
+					fElement_appendChild(this, oNode.firstChild);
 		}
 		else
-			throw new cDOMException(cDOMException.NOT_FOUND_ERR);
-	}
-	if (!oNextSibling) {
-		if (oNode.nodeType == 11)	// cNode.DOCUMENT_FRAGMENT_NODE
-			while (oNode.firstChild)
-				fElement_appendChild(this, oNode.firstChild);
+		if (oBefore)
+			fElement_insertBefore(this, oNode, oBefore);
 		else
 			fElement_appendChild(this, oNode);
 	}
+	else
+		throw new cDOMException(cDOMException.NOT_FOUND_ERR);
 
 	//
 	return oOld;
