@@ -142,7 +142,9 @@ function fElement_removeChild(oParent, oNode) {
 	// Call parent class method
 	fNode_removeChild(oParent, oNode);
 
-
+	oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMNodeRemovalCompleted", true, false, oParent, null, null, null, null);
+	fEventTarget_dispatchEvent(oNode, oEvent);
 	return oNode;
 };
 
