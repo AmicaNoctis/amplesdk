@@ -60,8 +60,18 @@ cQuery.prototype.trigger	= function(sType, oDetail) {
 
 	if (arguments.length < 2)
 		oDetail	= null;
-	fQuery_each(this, function() {
-		fQuery_trigger(this, sType, oDetail);
+
+	fQuery_trigger(this, sType, oDetail);
+
+	return this;
+};
+
+function fQuery_bindunbind(oQuery, sType, fHandler, bCapture, bUnbind) {
+	var fFunction	= bUnbind ? fEventTarget_removeEventListener : fEventTarget_addEventListener;
+	sType.split(/\s+/).forEach(function(sType) {
+		fQuery_each(oQuery, function() {
+			fFunction(this, sType, fHandler, bCapture || false);
+		});
 	});
 };
 
@@ -74,9 +84,8 @@ cQuery.prototype.bind	= function(sType, fHandler, bCapture) {
 	]);
 //<-Guard
 
-	fQuery_each(this, function() {
-		fEventTarget_addEventListener(this, sType, fHandler, bCapture || false);
-	});
+	fQuery_bindunbind(this, sType, fHandler, bCapture);
+	//
 	return this;
 };
 
@@ -89,9 +98,8 @@ cQuery.prototype.unbind	= function(sType, fHandler, bCapture) {
 	]);
 //<-Guard
 
-	fQuery_each(this, function() {
-		fEventTarget_removeEventListener(this, sType, fHandler, bCapture || false);
-	});
+	fQuery_bindunbind(this, sType, fHandler, bCapture, true);
+	//
 	return this;
 };
 
@@ -106,7 +114,9 @@ oAmple.bind	= function(sType, fHandler, bCapture) {
 	]);
 //<-Guard
 
-	fEventTarget_addEventListener(oAmple_document, sType, fHandler, bCapture || false);
+	fQuery_bindunbind(fQuery_fromArray([oAmple_document]), sType, fHandler, bCapture);
+
+	return this;
 };
 
 oAmple.unbind	= function(sType, fHandler, bCapture) {
@@ -118,13 +128,17 @@ oAmple.unbind	= function(sType, fHandler, bCapture) {
 	]);
 //<-Guard
 
-	fEventTarget_removeEventListener(oAmple_document, sType, fHandler, bCapture || false);
+	fQuery_bindunbind(fQuery_fromArray([oAmple_document]), sType, fHandler, bCapture, true);
+
+	return this;
 };
 
-function fQuery_trigger(oNode, sType, oDetail) {
-	var oEvent	= new cCustomEvent;
-	oEvent.initCustomEvent(sType, true, true, oDetail);
-	fEventTarget_dispatchEvent(oNode, oEvent);
+function fQuery_trigger(oQuery, sType, oDetail) {
+	fQuery_each(oQuery, function() {
+		var oEvent	= new cCustomEvent;
+		oEvent.initCustomEvent(sType, true, true, oDetail);
+		fEventTarget_dispatchEvent(this, oEvent);
+	});
 };
 
 oAmple.trigger	= function(sType, oDetail) {
@@ -142,5 +156,7 @@ oAmple.trigger	= function(sType, oDetail) {
 	if (arguments.length < 2)
 		oDetail	= null;
 
-	fQuery_trigger(oAmple_document, sType, oDetail);
+	fQuery_trigger(fQuery_fromArray([oAmple_document]), sType, oDetail);
+
+	return this;
 };
