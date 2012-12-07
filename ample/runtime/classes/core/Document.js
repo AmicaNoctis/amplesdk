@@ -45,26 +45,21 @@ cDocument.prototype.createAttribute	= function(sName) {
 };
 
 function fDocument_createAttributeNS(oDocument, sNameSpaceURI, sQName) {
-//->Source
-/*
 	var oNode		= new cAttr,
 		aQName		= sQName.split(':'),
 		sLocalName	= aQName.pop(),
 		sPrefix		= aQName.pop() || null;
 
-	oNode.ownerDocument	= this;
+	oNode.ownerDocument	= oDocument;
 	oNode.localName		= sLocalName;
 	oNode.prefix		= sPrefix;
 	oNode.namespaceURI	= sNameSpaceURI;
-	oNode.nodeName		= sQName;
-	oNode.nodeValue		= '';
-	oNode.name			= oNode.nodeName;
-	oNode.value			= oNode.nodeValue;
+	oNode.nodeName		=
+	oNode.name			= sQName;
+	oNode.nodeValue		=
+	oNode.value			= '';
 
 	return oNode;
-*/
-//<-Source
-	throw new cDOMException(cDOMException.NOT_SUPPORTED_ERR);
 };
 
 cDocument.prototype.createAttributeNS	= function(sNameSpaceURI, sQName) {
@@ -81,7 +76,7 @@ cDocument.prototype.createAttributeNS	= function(sNameSpaceURI, sQName) {
 function fDocument_createTextNode(oDocument, sData) {
 	var oNode	= new cText;
 	oNode.ownerDocument	= oDocument;
-	oNode.nodeValue	= sData;
+	oNode.nodeValue	=
 	oNode.data		= sData;
 	oNode.length	= sData.length;
 
@@ -104,7 +99,7 @@ cDocument.prototype.createTextNode	= function(sData) {
 function fDocument_createCDATASection(oDocument, sData) {
 	var oNode	= new cCDATASection;
 	oNode.ownerDocument	= oDocument;
-	oNode.nodeValue	= sData;
+	oNode.nodeValue	=
 	oNode.data		= sData;
 	oNode.length	= sData.length;
 
@@ -129,7 +124,7 @@ cDocument.prototype.createCDATASection	= function(sData) {
 function fDocument_createComment(oDocument, sData) {
 	var oNode	= new cComment;
 	oNode.ownerDocument	= oDocument;
-	oNode.nodeValue	= sData;
+	oNode.nodeValue	=
 	oNode.data		= sData;
 	oNode.length	= sData.length;
 
@@ -177,10 +172,10 @@ function fDocument_createElementNS(oDocument, sNameSpaceURI, sQName) {
 		sName;
 
 	// DOM Properties
-	oElement.attributes		= new cAttributeMap(oElement);
+	oElement.attributes		= new cNamedNodeMap;
 	oElement.ownerDocument	= oDocument;
 	oElement.prefix			= sPrefix;
-	oElement.nodeName		= sQName;
+	oElement.nodeName		=
 	oElement.tagName		= sQName;
 	oElement.childNodes		= new cNodeList;
 
@@ -192,7 +187,7 @@ function fDocument_createElementNS(oDocument, sNameSpaceURI, sQName) {
 		// Set default attributes, if defined
 		for (sName in fConstructor.attributes)
 			if (fConstructor.attributes.hasOwnProperty(sName))
-				oElement.attributes[sName]	= fConstructor.attributes[sName];
+				fElement_setAttribute(oElement, sName, fConstructor.attributes[sName]);
 	}
 	else {
 		// Set namespaceURI for unknown elements manually
@@ -239,8 +234,10 @@ cDocument.prototype.createDocumentFragment	= function() {
 function fDocument_createProcessingInstruction(oDocument, sTarget, sData) {
 	var oNode	= new (hClasses['?' + sTarget] || cProcessingInstruction);
 	oNode.ownerDocument	= oDocument;
-	oNode.nodeName	= oNode.target	= sTarget;
-	oNode.nodeValue	= oNode.data	= sData;
+	oNode.nodeName	=
+	oNode.target	= sTarget;
+	oNode.nodeValue	=
+	oNode.data		= sData;
 
 	return oNode;
 };
@@ -357,8 +354,7 @@ function fDocument_importNode(oDocument, oElementDOM, bDeep, oParent) {
 				// Create element
 				oNode	= fDocument_createElementNS(oDocument, sNameSpaceURI, oElementDOM.nodeName);
 
-				var oAttributes	= oNode.attributes,
-					aAttributes	= oElementDOM.attributes,
+				var aAttributes	= oElementDOM.attributes,
 					oAttribute, sName, sValue;
 
 				for (var nIndex = 0, nLength = aAttributes.length; nIndex < nLength; nIndex++) {
@@ -370,8 +366,8 @@ function fDocument_importNode(oDocument, oElementDOM, bDeep, oParent) {
 					if (bGecko && sValue == sNS_XUL + '#')
 						sValue	= sNS_XUL;
 
-					// Inline event handler
-					if (sName.indexOf('on') == 0) {
+					// Inline event handler (only from null namespace)
+					if (!oAttribute.namespaceURI && sName.indexOf('on') == 0) {
 						try {
 							oNode[sName]	= new cFunction(sNameSpaceURI == sNS_SVG ? "evt" : "event", sValue);
 						} catch (oException) {
@@ -380,20 +376,17 @@ function fDocument_importNode(oDocument, oElementDOM, bDeep, oParent) {
 //<-Debug
 						}
 					}
-					else
-						oAttributes[sName]	= sValue;
+					else {
+						fElement_setAttributeNS(oNode, oAttribute.namespaceURI || null, sName, sValue);
+//->Debug
+						if (oAttribute.namespaceURI &&!sName.match(/^xml(:|ns(:|$))/) &&!(hClasses[oAttribute.namespaceURI + '#' + '@' + oAttribute.localName]))
+							fUtilities_warn(sGUARD_UNKNOWN_ATTRIBUTE_NS_WRN, [oAttribute.localName, oAttribute.namespaceURI]);
+//<-Debug
+					}
 				}
 
-				// Copy default attributes values if not specified
-				var fConstructor	= hClasses[sNameSpaceURI + '#' + sLocalName];
-				if (fConstructor) {
-					for (sName in fConstructor.attributes)
-						if (fConstructor.attributes.hasOwnProperty(sName) && !(sName in oAttributes))
-							oAttributes[sName]	= fConstructor.attributes[sName];
-				}
 //->Debug
-				else
-				if (!(sNameSpaceURI == sNS_XHTML && sLocalName == "div"))
+				if (!hClasses[sNameSpaceURI + '#' + sLocalName] && !(sNameSpaceURI == sNS_XHTML && sLocalName == "div"))
 					fUtilities_warn(sGUARD_UNKNOWN_ELEMENT_NS_WRN, [oElementDOM.nodeName, sNameSpaceURI]);
 //<-Debug
 
@@ -403,8 +396,8 @@ function fDocument_importNode(oDocument, oElementDOM, bDeep, oParent) {
 
 				// Render Children
 				if (bDeep)
-					for (var nIndex = 0, nLength = oElementDOM.childNodes.length; nIndex < nLength; nIndex++)
-						fDocument_importNode(oDocument, oElementDOM.childNodes[nIndex], bDeep, oNode);
+					for (var nIndex = 0, aElements = oElementDOM.childNodes, nLength = aElements.length; nIndex < nLength; nIndex++)
+						fDocument_importNode(oDocument, aElements[nIndex], bDeep, oNode);
 				//
 				return oNode;
 			}
@@ -412,8 +405,8 @@ function fDocument_importNode(oDocument, oElementDOM, bDeep, oParent) {
 
 		case 5:	// cNode.ENTITY_REFERENCE_NODE
 			// This is normally  executed only in IE
-			for (var nIndex = 0, nLength = oElementDOM.childNodes.length; nIndex < nLength; nIndex++)
-				fDocument_importNode(oDocument, oElementDOM.childNodes[nIndex], bDeep, oParent);
+			for (var nIndex = 0, aElements = oElementDOM.childNodes, nLength = aElements.length; nIndex < nLength; nIndex++)
+				fDocument_importNode(oDocument, aElements[nIndex], bDeep, oParent);
 			break;
 
 		case 3:	// cNode.TEXT_NODE
@@ -513,7 +506,7 @@ function fDocument_register(oDocument, oElement) {
 //		oDocument_shadow[oElement.uniqueID]	= {};
 
 		// Register "identified" Instance
-		var sId	= oElement.attributes.id;
+		var sId	= fElement_getAttribute(oElement, 'id');
 		if (sId) {
 //->Debug
 			if (oDocument_ids[sId])
@@ -530,40 +523,17 @@ function fDocument_register(oDocument, oElement) {
 		}
 
 		// Global attributes module
-		for (var sName in oElement.attributes) {
-			if (oElement.attributes.hasOwnProperty(sName)) {
-				var aQName		= sName.split(':'),
-					sLocalName	= aQName.pop(),
-					sPrefix		= aQName.pop() || null,
-					sNameSpaceURI;
-
-				if (sName != "xmlns" && sPrefix && sPrefix != "xmlns" && (sNameSpaceURI = fNode_lookupNamespaceURI(oElement, sPrefix))) {
-					var fConstructor	= hClasses[sNameSpaceURI + '#' + '@' + sLocalName];
-					if (fConstructor)	{
-						// oAttribute used to create fake object
-						var oAttribute	= new fConstructor;
-						oAttribute.ownerDocument= oDocument;
-						oAttribute.ownerElement	= oElement;
-						oAttribute.name			=
-						oAttribute.nodeName		= sName;
-						oAttribute.value		=
-						oAttribute.nodeValue	= oElement.attributes[sName];
-						oAttribute.localName	= sLocalName;
-						oAttribute.prefix		= sPrefix;
-						oAttribute.namespaceURI	= sNameSpaceURI;
-
-						// Fire Mutation event (pseudo)
-						oEvent	= new cMutationEvent;
-						oEvent.initMutationEvent("DOMNodeInsertedIntoDocument", false, false, null, null, null, null, null);
-						oEvent.target	=
-						oEvent.currentTarget	= oAttribute;
-						oEvent.eventPhase		= 2 /* cEvent.AT_TARGET */;
-						fEventTarget_handleEvent(oAttribute, oEvent);
-					}
-//->Debug
-					else
-						fUtilities_warn(sGUARD_UNKNOWN_ATTRIBUTE_NS_WRN, [sLocalName, sNameSpaceURI]);
-//<-Debug
+		for (var nIndex = 0, nLength = oElement.attributes.length, oAttribute; nIndex < nLength; nIndex++) {
+			if ((oAttribute = oElement.attributes[nIndex]).namespaceURI && oAttribute.namespaceURI != sNS_XML && oAttribute.namespaceURI != sNS_XMLNS) {
+				var fConstructor	= hClasses[oAttribute.namespaceURI + '#' + '@' + oAttribute.localName];
+				if (fConstructor)	{
+					// Fire Mutation event (pseudo)
+					oEvent	= new cMutationEvent;
+					oEvent.initMutationEvent("DOMNodeInsertedIntoDocument", false, false, null, null, null, null, null);
+					oEvent.target	=
+					oEvent.currentTarget	= oAttribute;
+					oEvent.eventPhase		= 2 /* cEvent.AT_TARGET */;
+					fEventTarget_handleEvent(oAttribute, oEvent);
 				}
 			}
 		}
@@ -613,8 +583,9 @@ function fDocument_unregister(oDocument, oElement) {
 //		delete oDocument_shadow[oElement.uniqueID];
 
 		// Unregister "identified" Instance
-		if (oElement.attributes.id)
-			delete oDocument_ids[oElement.attributes.id];
+		var sId	= fElement_getAttribute(oElement, 'id');
+		if (sId)
+			delete oDocument_ids[sId];
 
 		var oFragment	= oElement.contentFragment,
 			nIndex,

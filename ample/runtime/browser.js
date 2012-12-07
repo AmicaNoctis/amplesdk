@@ -107,7 +107,7 @@ function fBrowser_render(oNode) {
 				}
 				else {
 					// Add namespace declarations to the shadow content
-					if (!("xmlns" + (oNode.prefix ? ':' + oNode.prefix : '') in oNode.attributes) || (oNode.namespaceURI != sNS_SVG && oNode.namespaceURI != sNS_XHTML))
+					if (!fNamedNodeMap_getNamedItem(oNode.attributes, "xmlns" + (oNode.prefix ? ':' + oNode.prefix : '')) || (oNode.namespaceURI != sNS_SVG && oNode.namespaceURI != sNS_XHTML))
 						sHtml	= sHtml.replace(/^(<(?:(\w+)(:))?(\w+))/, '$1 ' + "xmlns" + '$3$2="' + (oNode.namespaceURI == sNS_SVG ? sNS_SVG : sNS_XHTML) + '"');
 					oElement	= oUADocument.importNode(fBrowser_parseXML('<!' + "DOCTYPE" + ' ' + "div" + '[' + sBrowser_entities + ']>' + '<div' + ' ' + "xmlns" + '="' + sNS_XHTML + '">' + sHtml + '</div>').documentElement, true);
 				}
@@ -445,6 +445,7 @@ function fBrowser_onMouseMove(oEvent) {
 	var oTarget		= fBrowser_getEventTarget(oEvent),
 		oPseudo		= fBrowser_getUIEventPseudo(oEvent),
 		nButton		= fBrowser_getUIEventButton(oEvent),
+		oElementDOM,
 		nIndexCommon=-1,
 		aElements	= new cNodeList,
 		oElement,
@@ -476,12 +477,13 @@ function fBrowser_onMouseMove(oEvent) {
 				// do not dispatch event if outside modal
 				if (!oBrowser_modalNode || fBrowser_isDescendant(oElement, oBrowser_modalNode)) {
 					// Remove :hover pseudo-class
-					if ((oDOMConfiguration_values["ample-enable-css-hover"] || oElement.$hoverable) && oPseudo && oElement.$isAccessible())
+					oElementDOM	= oElement.$getContainer();
+					if ((oDOMConfiguration_values["ample-enable-css-hover"] || oElement.$hoverable) && oElementDOM && oElement.$isAccessible())
 						fElement_setPseudoClass(oElement, "hover", false);
 					//
 					oEventMouseLeave	= new cMouseEvent;
 					oEventMouseLeave.initMouseEvent("mouseleave", false, false, window, null, oEvent.screenX, oEvent.screenY, oEvent.clientX, oEvent.clientY, oEvent.ctrlKey, oEvent.altKey, oEvent.shiftKey, oEvent.metaKey, nButton, aBrowser_mouseNodes[nIndex + 1] || null);
-					oEventMouseLeave.$pseudoTarget	= oPseudo;
+					oEventMouseLeave.$pseudoTarget	= oElementDOM;
 					fEventTarget_dispatchEvent(oElement, oEventMouseLeave);
 				}
 			}
@@ -492,12 +494,13 @@ function fBrowser_onMouseMove(oEvent) {
 				// do not dispatch event if outside modal
 				if (!oBrowser_modalNode || fBrowser_isDescendant(oElement, oBrowser_modalNode)) {
 					// Add :hover pseudo-class
-					if ((oDOMConfiguration_values["ample-enable-css-hover"] || oElement.$hoverable) && oPseudo && oElement.$isAccessible())
+					oElementDOM	= oElement.$getContainer();
+					if ((oDOMConfiguration_values["ample-enable-css-hover"] || oElement.$hoverable) && oElementDOM && oElement.$isAccessible())
 						fElement_setPseudoClass(oElement, "hover", true);
 					//
 					oEventMouseEnter	= new cMouseEvent;
 					oEventMouseEnter.initMouseEvent("mouseenter", false, false, window, null, oEvent.screenX, oEvent.screenY, oEvent.clientX, oEvent.clientY, oEvent.ctrlKey, oEvent.altKey, oEvent.shiftKey, oEvent.metaKey, nButton, aElements[nIndex] || null);
-					oEventMouseEnter.$pseudoTarget	= oPseudo;
+					oEventMouseEnter.$pseudoTarget	= oElementDOM;
 					fEventTarget_dispatchEvent(oElement, oEventMouseEnter);
 				}
 			}
@@ -1017,9 +1020,9 @@ function fBrowser_processScripts() {
 			// retrieve namespaces list (in older than IE6, attributes on script tag are not parsed into collection)
 			if (bTrident && (nVersion < 6 || nVersion > 8)) {
 				if (aAttributes	= oElementDOM.outerHTML.match(/<script([^\>]+)/i)[1].match(/[^=]+=("[^"]+"|[^\s]+)/gi))
-					for (var nAttribute = 0; oAttribute = aAttributes[nAttribute]; nAttribute++)
-						if (oAttribute.match(/\s([^=]+)="?([^"]+)"?/i) && (sAttribute = cRegExp.$1) != "type")
-							hAttributes[sAttribute]	= cRegExp.$2;
+					for (var nAttribute = 0, aMatch; oAttribute = aAttributes[nAttribute]; nAttribute++)
+						if ((aMatch = oAttribute.match(/\s([^=]+)="?([^"]+)"?/i)) && (sAttribute = aMatch[1]) != "type")
+							hAttributes[sAttribute]	= aMatch[2];
 			}
 			else {
 				aAttributes	= oElementDOM.attributes;
@@ -1050,19 +1053,19 @@ function fBrowser_processScripts() {
 				// import XML DOM into Ample DOM
 				oElement	= fDocument_importNode(oAmple_document, oDocument.documentElement, true);
 				// Remove prefixes declarations (already available from root)
-				if (!bReferenced) {
-					for (sAttribute in oAmple.prefixes) {
-						sPrefix	= "xmlns" + (sAttribute == '' ? '' : ':' + sAttribute);
-						if (sPrefix in hAttributes && hAttributes[sPrefix] == oAmple.prefixes[sAttribute])
-							delete oElement.attributes[sPrefix];
-					}
+//				if (!bReferenced) {
+//					for (sAttribute in oAmple.prefixes) {
+//						sPrefix	= "xmlns" + (sAttribute == '' ? '' : ':' + sAttribute);
+//						if (sPrefix in hAttributes && hAttributes[sPrefix] == oAmple.prefixes[sAttribute])
+//							delete oElement.attributes[sPrefix];
+//					}
 /*
 					// Change root element name to script
 					oElement.nodeName	=
 					oElement.localName	=
 					oElement.tagName	= "script";
 */
-				}
+//				}
 				// render Ample DOM
 				if (bTrident && nVersion < 9) {
 					oElementNew	= oUADocument.createElement("div");

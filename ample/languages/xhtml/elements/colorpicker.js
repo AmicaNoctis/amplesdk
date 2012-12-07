@@ -31,8 +31,8 @@ var cXHTMLElement_colorpicker	= function() {
 };
 cXHTMLElement_colorpicker.prototype	= new cXHTMLElement("colorpicker");
 
-cXHTMLElement_colorpicker.attributes	= {};
-cXHTMLElement_colorpicker.attributes.value	= "#FF0000";
+//
+cXHTMLElement_colorpicker.DEFAULT_VALUE	= "#FF0000";
 
 // Public  Method
 
@@ -114,7 +114,7 @@ cXHTMLElement_colorpicker.prototype._onPointersBrightnessMouseMove	= function(oE
 cXHTMLElement_colorpicker.prototype._onPointersBrightnessMouseDown	= function(oEvent) {
 	var oElement	= this;
 	document.onmousemove	= function(e) {
-		return oElement._onPointersBrightnessMouseMove(e || event)
+		return oElement._onPointersBrightnessMouseMove(e || event);
 	};
 	document.onmouseup	= function() {
 		oElement._detachHandlers();
@@ -135,7 +135,7 @@ cXHTMLElement_colorpicker.prototype._onPointerPaletteMouseMove	= function(oEvent
 cXHTMLElement_colorpicker.prototype._onPointerPaletteMouseDown	= function(oEvent) {
 	var oElement	= this;
 	document.onmousemove	= function(e) {
-		return oElement._onPointerPaletteMouseMove(e || event)
+		return oElement._onPointerPaletteMouseMove(e || event);
 	};
 	document.onmouseup	= function() {
 		oElement._detachHandlers();
@@ -144,7 +144,7 @@ cXHTMLElement_colorpicker.prototype._onPointerPaletteMouseDown	= function(oEvent
 };
 
 cXHTMLElement_colorpicker.prototype.acceptDialog	= function() {
-	this.attributes.value	= this.$getContainer('value').value;
+	this.setAttribute("value", this.$getContainer('value').value);
 
 	// fire select event
 	var oEvent	= this.ownerDocument.createEvent("CustomEvent");
@@ -153,7 +153,7 @@ cXHTMLElement_colorpicker.prototype.acceptDialog	= function() {
 };
 
 cXHTMLElement_colorpicker.prototype.cancelDialog	= function() {
-	this.setAttribute("value", this.attributes.value);
+	this.setAttribute("value", this.getAttribute("value"));
 
 	// fire cancel event
 	var oEvent	= this.ownerDocument.createEvent("CustomEvent");
@@ -164,7 +164,7 @@ cXHTMLElement_colorpicker.prototype.cancelDialog	= function() {
 // Class handlers
 cXHTMLElement_colorpicker.handlers	= {
 	"DOMNodeInsertedIntoDocument":	function() {
-		this._setColor(cXHTMLElement_colorpicker.attributes.value);
+		this._setColor(cXHTMLElement_colorpicker.DEFAULT_VALUE);
 	}
 };
 

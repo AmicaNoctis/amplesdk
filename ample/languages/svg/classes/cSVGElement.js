@@ -41,7 +41,7 @@ if (cSVGElement.useVML) {
 	};
 
 	cSVGElement.getMatrixOwn	= function(oElement) {
-		var sValue		= oElement.attributes["transform"] || '',
+		var sValue		= oElement.getAttribute("transform") || '',
 			aCommands	= sValue.match(/\w+\([^\)]+\s*,?\)/g),
 			aMatrix		= cSVGElement.matrixCreate();
 
@@ -169,17 +169,16 @@ if (cSVGElement.useVML) {
 					cSVGElement.applyTransform(oElement.childNodes[nIndex]);
 	};
 
-	// Note! Performance optimization: Getting attribute values in a hacky way here ".attributes[]" instead of ".getAttribute()"
 	cSVGElement.prototype.$getStyle	= function(sName) {
 		var sValue;
 
 		// 1) first check if style specified
-		if (sValue = this.attributes["style"])
+		if (sValue = this.getAttribute("style"))
 			if (sValue.match(new RegExp(sName + "\\s*:\\s*[\'\"]?\\s*([^;\'\"]+)\\s*[\'\"]?")))
 				return RegExp.$1;
 
 		// 2) second check if attribute specified
-		if (sValue = this.attributes[sName])
+		if (sValue = this.getAttribute(sName))
 			return sValue;
 
 		return '';
@@ -215,10 +214,10 @@ if (cSVGElement.useVML) {
 					if (oGradient = this.ownerDocument.getElementById(aValue[1])) {
 						if (oGradient instanceof cSVGElement_linearGradient || oGradient instanceof cSVGElement_radialGradient) {
 							if (oGradient instanceof cSVGElement_linearGradient) {
-								var x1	= parseFloat(oGradient.getAttribute("x1") || "0") / (oGradient.getAttribute("x1").indexOf("%") ==-1 ? 1 : 100),
-									x2	= parseFloat(oGradient.getAttribute("x2") || "1") / (oGradient.getAttribute("x2").indexOf("%") ==-1 ? 1 : 100),
-									y1	= parseFloat(oGradient.getAttribute("y1") || "0") / (oGradient.getAttribute("y1").indexOf("%") ==-1 ? 1 : 100),
-									y2	= parseFloat(oGradient.getAttribute("y2") || "0") / (oGradient.getAttribute("y2").indexOf("%") ==-1 ? 1 : 100);
+								var x1	= parseFloat(oGradient.getAttribute("x1") || "0") / ((oGradient.getAttribute("x1") || '').indexOf("%") ==-1 ? 1 : 100),
+									x2	= parseFloat(oGradient.getAttribute("x2") || "1") / ((oGradient.getAttribute("x2") || '').indexOf("%") ==-1 ? 1 : 100),
+									y1	= parseFloat(oGradient.getAttribute("y1") || "0") / ((oGradient.getAttribute("y1") || '').indexOf("%") ==-1 ? 1 : 100),
+									y2	= parseFloat(oGradient.getAttribute("y2") || "0") / ((oGradient.getAttribute("y2") || '').indexOf("%") ==-1 ? 1 : 100);
 
 								if (x1 == x2 && y1 == y2) {
 									oElementDOM.fill.type		= "solid";
@@ -230,8 +229,8 @@ if (cSVGElement.useVML) {
 								}
 							}
 							else {
-								var cx	= parseFloat(oGradient.getAttribute("cx") || "0.5") / (oGradient.getAttribute("cx").indexOf("%") ==-1 ? 1 : 100),
-									cy	= parseFloat(oGradient.getAttribute("cy") || "0.5") / (oGradient.getAttribute("cy").indexOf("%") ==-1 ? 1 : 100);
+								var cx	= parseFloat(oGradient.getAttribute("cx") || "0.5") / ((oGradient.getAttribute("cx") || '').indexOf("%") ==-1 ? 1 : 100),
+									cy	= parseFloat(oGradient.getAttribute("cy") || "0.5") / ((oGradient.getAttribute("cy") || '').indexOf("%") ==-1 ? 1 : 100);
 								oElementDOM.fill.type		= "gradientTitle";
 								oElementDOM.fill.focus		= "100%";	// Must be set to 100%, otherwise no gradient visible
 								// Properties specific to radial gradients
@@ -242,7 +241,7 @@ if (cSVGElement.useVML) {
 							oElementDOM.fill.method		= "sigma";
 
 							// Find referred gradient with stops
-							for (var oGradientStop = oGradient; oGradientStop && oGradientStop.hasAttribute("xlink:href"); oGradientStop = this.ownerDocument.getElementById(oGradientStop.getAttribute("xlink:href").substr(1)))
+							for (var oGradientStop = oGradient; oGradientStop && oGradientStop.hasAttribute("xlink:href"); oGradientStop = this.ownerDocument.getElementById((oGradientStop.getAttribute("xlink:href") || '').substr(1)))
 								if (oGradientStop.hasChildNodes())
 									break;
 
@@ -252,7 +251,7 @@ if (cSVGElement.useVML) {
 									nOpacity	=(this.$getStyleComputed("opacity") || 1) * (this.$getStyleComputed("fill-opacity") || 1);
 								for (var i = 0, oStop, sColor; oStop = oGradientStop.childNodes[i]; i++)
 									if (oGradientStop.childNodes[i] instanceof cSVGElement_stop)
-										aColors.push([parseFloat(oStop.getAttribute("offset") || "1") / (oStop.getAttribute("offset").indexOf("%") ==-1 ? 1 : 100), ((sColor = oStop.$getStyle("stop-color")) in oSVGElement_colors ? 'rgb(' + oSVGElement_colors[sColor] + ')' : cSVGElement.correctColor(sColor)), nOpacity * parseFloat(oStop.$getStyle("stop-opacity") || "1")]);
+										aColors.push([parseFloat(oStop.getAttribute("offset") || "1") / ((oStop.getAttribute("offset") || '').indexOf("%") ==-1 ? 1 : 100), ((sColor = oStop.$getStyle("stop-color")) in oSVGElement_colors ? 'rgb(' + oSVGElement_colors[sColor] + ')' : cSVGElement.correctColor(sColor)), nOpacity * parseFloat(oStop.$getStyle("stop-opacity") || "1")]);
 
 								var nLength	= aColors.length;
 								if (nLength) {
@@ -306,7 +305,7 @@ if (cSVGElement.useVML) {
 					nStrokeWidth	= aStrokeWidth[1] * cSVGElement.getScaleFactor(this) * Math.sqrt(Math.abs(cSVGElement.matrixDeterminant(cSVGElement.getMatrix(this))));
 				oElementDOM.stroke.weight	= nStrokeWidth + (aStrokeWidth[2] || 'px');
 				if (nStrokeWidth < 1 && !(this instanceof cSVGElement_text || this instanceof cSVGElement_tspan || this instanceof cSVGElement_textPath))
-					oElementDOM.stroke.opacity	= (this.attributes["stroke-opacity"] || 1) * nStrokeWidth;
+					oElementDOM.stroke.opacity	= (this.getAttribute("stroke-opacity") || 1) * nStrokeWidth;
 				else
 					oElementDOM.stroke.opacity	= 1;
 				break;
@@ -501,9 +500,9 @@ if (cSVGElement.useVML) {
 		var aAspect	= [1, 1],
 			oNode	= cSVGElement.getViewportElement(oElement);
 		if (oNode) {
-			var aViewBox= (oNode.attributes["viewBox"] || "").split(/[\s,]/),
-				aWidth	= (oNode.attributes["width"] || "").match(/([\d.]+)([%\w]*)/),
-				aHeight	= (oNode.attributes["height"] || "").match(/([\d.]+)([%\w]*)/);
+			var aViewBox= (oNode.getAttribute("viewBox") || "").split(/[\s,]/),
+				aWidth	= (oNode.getAttribute("width") || "").match(/([\d.]+)([%\w]*)/),
+				aHeight	= (oNode.getAttribute("height") || "").match(/([\d.]+)([%\w]*)/);
 			// Assume some values
 			if (aViewBox.length < 4) {
 				if (!aWidth)
@@ -853,10 +852,10 @@ else {
 	// Default Element Render: open
 	cSVGElement.prototype.$getTagOpen	= function() {
 		var sHtml	= '<' + this.tagName;
-		for (var sName in this.attributes)
-			if (this.attributes.hasOwnProperty(sName) && sName != "id" && sName != "class")// && sName.indexOf(':') ==-1)
-				sHtml	+= ' ' + sName + '="' + ample.$encodeXMLCharacters(this.attributes[sName]) + '"';
-		sHtml	+= ' class="' + ('svg-' + this.localName + ' ') + (this.prefix ? this.prefix + '-' : '') + this.localName + ("class" in this.attributes ? ' ' + this.attributes["class"] : '') + '"';
+		for (var nIndex = 0, oAttribute; nIndex < this.attributes.length; nIndex++)
+			if ((oAttribute = this.attributes[nIndex]).name != "id" && oAttribute.name != "class")// && sName.indexOf(':') ==-1)
+				sHtml	+= ' ' + oAttribute.name + '="' + ample.$encodeXMLCharacters(oAttribute.value) + '"';
+		sHtml	+= ' class="' + ('svg-' + this.localName + ' ') + (this.prefix ? this.prefix + '-' : '') + this.localName + (this.hasAttribute("class") ? ' ' + this.getAttribute("class") : '') + '"';
 		return sHtml + '>';
 	};
 

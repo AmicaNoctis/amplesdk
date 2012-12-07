@@ -59,6 +59,7 @@ fExporter_export(cTouchEvent,		"TouchEvent");
 
 // DOM-Core
 fExporter_export(cDOMStringList,	"DOMStringList");
+fExporter_export(cNamedNodeMap,		"NamedNodeMap");
 fExporter_export(cNode,				"Node");
 fExporter_export(cAttr,				"Attr");
 fExporter_export(cCDATASection,		"CDATASection");
@@ -108,5 +109,7 @@ fExporter_sign(oAmple.easing,	"easing");
 fExporter_sign(oAmple.locale,	"locale");
 fExporter_sign(cNodeSelector.pseudoClass,	"pseudoClass");
 fExporter_sign(oAmple_root.$getContainer,	"$getContainer");
+//
+fExporter_signMembers(oAmple, "ample");
 //
 window["ample"]	= oAmple;
