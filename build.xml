@@ -326,7 +326,7 @@
 			<!--arg value="––obfuscate" /-->
 			<arg value="--strip-Source" />
 			<!--arg value="––strip-Debug" /-->
-			<!--arg value="––strip-Guard" /-->
+			<arg value="--strip-Guard" />
 		</exec>
 		<replace file="${temp.runtime.dir}/runtime.js">
 			<replacefilter token="@project_version@"	value="${project.name}/${project.version} (build:${build.signature})"	/>
