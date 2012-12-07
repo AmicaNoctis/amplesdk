@@ -18,9 +18,6 @@ function fEventTarget_routeEvent(oTarget, oEvent) {
 		bUIEvent		= oEvent instanceof cUIEvent,
 		bMutationEvent	= oEvent instanceof cMutationEvent;
 
-	if (bMutationEvent && oEvent.type === "DOMNodeRemovalCompleted") {
-		oTarget.parentNode = oEvent.relatedNode;
-	}
 	// Populate stack targets (...document-fragment, document, #document)
 	for (var oNode = oTarget, oContext = oTarget; oNode; oNode = oNode.parentNode) {
 		if (oNode.nodeType == 11 /* cNode.DOCUMENT_FRAGMENT_NODE */) {
@@ -34,9 +31,6 @@ function fEventTarget_routeEvent(oTarget, oEvent) {
 		//
 		if (oNode.nodeType == 11 /* cNode.DOCUMENT_FRAGMENT_NODE */)
 			oContext	= oNode.parentNode;
-	}
-	if (bMutationEvent && oEvent.type === "DOMNodeRemovalCompleted") {
-		oTarget.parentNode = null;
 	}
 
 	// Propagate event
