@@ -36,6 +36,9 @@ cCharacterData.prototype.appendData	= function(sData) {
 	]);
 //<-Guard
 	fCharacterData_appendData(this, sData);
+	var oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+	fEventTarget_dispatchEvent(this, oEvent);
 };
 
 function fCharacterData_deleteData(oNode, nOffset, nLength) {
@@ -65,6 +68,9 @@ cCharacterData.prototype.deleteData	= function(nOffset, nLength) {
 		throw new cDOMException(cDOMException.INDEX_SIZE_ERR);
 
 	fCharacterData_deleteData(this, nOffset, nLength);
+	var oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+	fEventTarget_dispatchEvent(this, oEvent);
 };
 
 function fCharacterData_insertData(oNode, nOffset, sData) {
@@ -94,6 +100,9 @@ cCharacterData.prototype.insertData	= function(nOffset, sData) {
 		throw new cDOMException(cDOMException.INDEX_SIZE_ERR);
 
 	fCharacterData_insertData(this, nOffset, sData);
+	var oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+	fEventTarget_dispatchEvent(this, oEvent);
 };
 
 function fCharacterData_replaceData(oNode, nOffset, nLength, sData) {
@@ -124,6 +133,9 @@ cCharacterData.prototype.replaceData	= function(nOffset, nLength, sData) {
 		throw new cDOMException(cDOMException.INDEX_SIZE_ERR);
 
 	fCharacterData_replaceData(this, nOffset, nLength, sData);
+	var oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+	fEventTarget_dispatchEvent(this, oEvent);
 };
 
 function fCharacterData_substringData(oNode, nOffset, nLength) {
