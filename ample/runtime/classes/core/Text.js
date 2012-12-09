@@ -47,6 +47,9 @@ cText.prototype.splitText	= function(nOffset) {
 	var oNode	= this.$getContainer();
 	if (oNode)
 		oNode.nodeValue	= this.data;
+	var oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+	this.parentNode && fEventTarget_dispatchEvent(this.parentNode, oEvent);
 };
 
 cText.prototype.appendData	= function(sData) {
@@ -105,6 +108,9 @@ cText.prototype.replaceWholeText	= function(sData) {
 		oEvent.initMutationEvent("DOMCharacterDataModified", true, false, null, sValueOld, sData, null, null);
 		fEventTarget_dispatchEvent(this, oEvent);
 	}
+	var oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+	fEventTarget_dispatchEvent(this, oEvent);
 };
 
 cText.prototype.$getTag	= function() {
