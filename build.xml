@@ -139,6 +139,7 @@
 				DOMError.js,
 				Node.js,
 				NodeList.js,
+				AttributeMap.js,
 				Attr.js,
 				Element.js,
 				EntityReference.js,
