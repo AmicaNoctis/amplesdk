@@ -61,6 +61,9 @@ cElement.prototype.appendChild	= function(oNode) {
 	else
 		fElement_appendChild(this, oNode);
 	//
+	var oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+	fEventTarget_dispatchEvent(this, oEvent);
 	return oNode;
 };
 
@@ -114,6 +117,9 @@ cElement.prototype.insertBefore	= function(oNode, oBefore) {
 		else
 			fElement_appendChild(this, oNode);
 	}
+	var oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+	fEventTarget_dispatchEvent(this, oEvent);
 	return oNode;
 };
 
@@ -152,10 +158,16 @@ cElement.prototype.removeChild	= function(oNode) {
 	], this);
 //<-Guard
 
-	if (this.childNodes.$indexOf(oNode) !=-1)
-		return fElement_removeChild(this, oNode);
-	else
+	if (this.childNodes.$indexOf(oNode) != -1) {
+		var oChild = fElement_removeChild(this, oNode);
+		var oEvent	= new cMutationEvent;
+		oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+		fEventTarget_dispatchEvent(this, oEvent);
+		return oChild;
+	}
+	else {
 		throw new cDOMException(cDOMException.NOT_FOUND_ERR);
+	}
 };
 
 function fElement_replaceChild(oParent, oNode, oOld) {
@@ -210,6 +222,9 @@ cElement.prototype.replaceChild	= function(oNode, oOld) {
 		throw new cDOMException(cDOMException.NOT_FOUND_ERR);
 
 	//
+	var oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+	fEventTarget_dispatchEvent(this, oEvent);
 	return oOld;
 };
 
@@ -315,6 +330,9 @@ cElement.prototype.setAttribute	= function(sName, sValue) {
 //<-Guard
 
 	fElement_setAttribute(this, sName, cString(sValue));
+	var oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+	fEventTarget_dispatchEvent(this, oEvent);
 };
 
 function fElement_setAttributeNS(oElement, sNameSpaceURI, sQName, sValue) {
@@ -395,6 +413,9 @@ cElement.prototype.setAttributeNS	= function(sNameSpaceURI, sQName, sValue) {
 //<-Guard
 
 	fElement_setAttributeNS(this, sNameSpaceURI, sQName, cString(sValue));
+	var oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+	fEventTarget_dispatchEvent(this, oEvent);
 };
 
 cElement.prototype.setAttributeNode	= function(oAttribute) {
@@ -407,6 +428,9 @@ cElement.prototype.setAttributeNode	= function(oAttribute) {
 	// TODO: consider removing if it was attached somewhere else before
 
 	fElement_setAttributeNode(this, oAttribute);
+	var oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+	fEventTarget_dispatchEvent(this, oEvent);
 };
 
 function fElement_setAttributeNode(oElement, oAttribute) {
@@ -476,6 +500,9 @@ cElement.prototype.setAttributeNodeNS	= function(oAttribute) {
 	// TODO: consider removing if it was attached somewhere else before
 
 	fElement_setAttributeNodeNS(this, oAttribute);
+	var oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+	fEventTarget_dispatchEvent(this, oEvent);
 };
 
 function fElement_getAttribute(oElement, sQName) {
@@ -552,6 +579,9 @@ cElement.prototype.removeAttribute	= function(sName) {
 //<-Guard
 
 	fElement_removeAttribute(this, sName);
+	var oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+	fEventTarget_dispatchEvent(this, oEvent);
 };
 
 function fElement_removeAttributeNS(oElement, sNameSpaceURI, sLocalName) {
@@ -571,6 +601,9 @@ cElement.prototype.removeAttributeNS	= function(sNameSpaceURI, sLocalName) {
 //<-Guard
 
 	fElement_removeAttributeNS(this, sNameSpaceURI, sLocalName);
+	var oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+	fEventTarget_dispatchEvent(this, oEvent);
 };
 
 cElement.prototype.removeAttributeNode	= function(oAttribute) {
@@ -584,6 +617,9 @@ cElement.prototype.removeAttributeNode	= function(oAttribute) {
 		throw new cDOMException(cDOMException.HIERARCHY_REQUEST_ERR);
 	//
 	fElement_removeAttributeNode(this, oAttribute);
+	var oEvent	= new cMutationEvent;
+	oEvent.initMutationEvent("DOMSubtreeModified", true, false, null, "", "", "", 0);
+	fEventTarget_dispatchEvent(this, oEvent);
 };
 
 function fElement_removeAttributeNode(oElement, oAttribute) {
