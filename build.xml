@@ -189,6 +189,7 @@
 				manipulation.js,
 				modal.js,
 				offset.js,
+				oop.js,
 				queue.js,
 				traversing.js"/>
 			<!-- Processing instructions -->
