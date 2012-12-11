@@ -191,7 +191,8 @@
 				offset.js,
 				oop.js,
 				queue.js,
-				traversing.js"/>
+				traversing.js,
+				uuid.js"/>
 			<!-- Processing instructions -->
 			<filelist dir="${source.runtime.dir}/pis/" files="
 				xml.js,
