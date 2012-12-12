@@ -720,6 +720,53 @@
 					</locale>
 				</description>
 			</method>
+			<!-- OOP -->
+			<method name="defineClass" type="Void">
+				<arguments>
+					<argument name="fullName" type="String">
+						<description>
+							<locale>The name of the class including its namespace, 
+								e. g. com.example.MyClass</locale>
+						</description>
+					</argument>
+					<argument name="configuration" type="Object">
+						<description>
+							<locale>The class definition
+								<ul>
+									<li><b>extends</b> – Full name of parent class, default "Object".</li>
+									<li><b>statics</b> – Static members (variables and functions).</li>
+									<li><b>construct</b> – Constructor function, parent constructor is available as this.$base(arg1, ...).</li>
+									<li><b>vars</b> – Member variables, names of private variables are prefixed 
+										with a dash, protected with a hash and public members optionally by a plus 
+										sign. Access to protected and private members is only possible via the 
+										auto-generated accessor methods propertyName() for retrieval and 
+										propertyName(newValue) for modification.</li>
+									<li><b>events</b> – An array of event type names available. If specified and
+										non-empty,the	methods hasEventType(type:string):boolean,
+										addEventListener(type:string,callback:function):function,
+										removeEventListener(type:string,callback:function):function|null,
+										fireEvent(type:string,data:mixed),
+										suspendEvents(types...:string),
+										resumeEvents(types...:string) are made available.</li>
+									<li><b>methods</b> – Methods of the class, private methods are prefixed with a 
+										dash, protected one with a hash and public methods optionally with a plus 
+										sign. All of them have to be invoked without any prefix.</li>
+								</ul>
+							</locale>
+						</description>
+					</argument>
+				</arguments>
+				<description>
+					<locale>Defines a class according to the specified class definition that 
+						supports private, protected and public visibility and event handling methods.</locale>
+				</description>
+			</method>
+			<method name="createUuid" type="String">
+				<description>
+					<locale>Returns a UUID from random numbers, as specified in RFC4122 (version 4), e. g.
+						e4a332dc-b95d-4f76-87fd-5a7e4e6c5af3.</locale>
+				</description>
+			</method>
 		</methods>
 		<events>
 			<event name="configchange" type="dom:events:CustomEvent" cancelable="false" bubbles="false">

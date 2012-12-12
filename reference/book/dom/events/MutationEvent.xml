@@ -222,6 +222,7 @@
 				<li><link type="event" href="reference://dom/core/Node">DOMNodeInsertedIntoDocument</link></li>
 				<li><link type="event" href="reference://dom/core/Node">DOMNodeRemoved</link></li>
 				<li><link type="event" href="reference://dom/core/Node">DOMNodeRemovedFromDocument</link></li>
+				<li><link type="event" href="reference://dom/core/Node">DOMSubtreeModified</link></li>
 				<li><link type="event" href="reference://dom/core/Element">DOMAttrModified</link></li>
 				<li><link type="event" href="reference://dom/core/CharacterData">DOMCharacterDataModified</link></li>
 			</ul>

@@ -709,6 +709,14 @@
 					</locale>
 				</description>
 			</event>
+			<event name="DOMSubtreeModified" type="dom:events:MutationEvent" cancelable="false"
+					bubbles="true">
+				<description>
+					<locale>
+						The subtree attached to a node has been modified.
+					</locale>
+				</description>
+			</event>
 		</events>
 	</members>
 </class>
