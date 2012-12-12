@@ -150,12 +150,17 @@ cQuery.prototype.splice	= function(nFirst, nLength/*vValue1, vValue2,..vValueN*/
 };
 
 // Collection Manipulation
-function fQuery_each(oQuery, fCallback, aArguments) {
-	for (var nIndex = 0; nIndex < oQuery.length; nIndex++)
-		fCallback.apply(oQuery[nIndex], aArguments || [nIndex, oQuery[nIndex]]);
+function fQuery_each(oQuery, fCallback, aArguments, bBreakOnFalse) {
+	var nIndex, nLength, bResult;
+	for (nIndex = 0, nLength = oQuery.length; nIndex < nLength; nIndex++) {
+		bResult = fCallback.apply(oQuery[nIndex], aArguments || [nIndex, oQuery[nIndex]]);
+		if (bResult === false && bBreakOnFalse === true) {
+			break;
+		}
+	}
 };
 
-cQuery.prototype.each	= function(fCallback, aArguments) {
+cQuery.prototype.each	= function(fCallback, aArguments, bBreakOnFalse) {
 //->Guard
 	fGuard(arguments, [
 		["callback",	cFunction],
@@ -163,7 +168,6 @@ cQuery.prototype.each	= function(fCallback, aArguments) {
 	]);
 //<-Guard
 
-	fQuery_each(this, fCallback, aArguments);
-
+	fQuery_each(this, fCallback, aArguments, bBreakOnFalse);
 	return this;
 };
