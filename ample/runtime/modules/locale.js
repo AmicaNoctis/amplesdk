@@ -443,7 +443,12 @@ fExpandFormat	= function(oCalendar, sFormat) {
 	if (nLength === 1) {
 		sPattern	= oPattern[sFormat];
 		if (!sPattern) {
-			throw new cDOMException(cDOMException.SYNTAX_ERR, null, [sFormat]);
+			throw new cDOMException(cDOMException.SYNTAX_ERR
+//->Debug
+					, null
+					, [sFormat]
+//<-Debug
+			);
 		}
 		sFormat	= sPattern;
 	}
@@ -683,7 +688,12 @@ fFormatDate	= function(dValue, sFormat, oCulture) {
 				aDate.push(oCalendar['/']);
 				break;
 			default:
-				throw new cDOMException(cDOMException.SYNTAX_ERR, null, [sCurrent]);
+				throw new cDOMException(cDOMException.SYNTAX_ERR
+//->Debug
+						, null
+						, [sCurrent]
+//<-Debug
+				);
 		}
 	}
 	return aDate.join('');
@@ -804,7 +814,12 @@ fFormatDate	= function(dValue, sFormat, oCulture) {
 				nNumber	= fExpandNumber(nNumber * (sCurrent === 'P' ? 100 : 1), nPrecision, oNumberFormat);
 				break;
 			default:
-				throw new cDOMException(cDOMException.SYNTAX_ERR, null, [sCurrent]);
+				throw new cDOMException(cDOMException.SYNTAX_ERR
+//->Debug
+						, null
+						, [sCurrent]
+//<-Debug
+				);
 		}
 
 		var rPattern	= /n|\$|-|%/g,
@@ -1017,7 +1032,12 @@ fGetEraYear	= function(dValue, oCalendar, nEra, bSortable) {
 					sAddition	= '(\\/)';
 					break;
 				default:
-					throw new cDOMException(cDOMException.SYNTAX_ERR, null, [sMatch]);
+					throw new cDOMException(cDOMException.SYNTAX_ERR
+//->Debug
+							, null
+							, [sMatch]
+//<-Debug
+					);
 			}
 			if (sAddition) {
 				aRegexp.push(sAddition);
@@ -1431,10 +1451,10 @@ oGlobalize.format	= function(vValue, sFormat, sCultureSelector) {
 };
 
 oGlobalize.localize	= function(sKey, sCultureSelector) {
-	var sValue this.findClosestCulture(sCultureSelector).messages[sKey] ||
+	var sValue = this.findClosestCulture(sCultureSelector).messages[sKey] ||
 		this.cultures["default"].messages[sKey] || "";
 	if (!sValue && window.console && console.warn) {
-		console.warn("Missing translation for " + sKey + " in " + sCultureSelector);
+		console.warn("Missing translation for " + sKey + " in " + oCulture.name);
 	}
 	return sValue;
 };
@@ -1603,7 +1623,7 @@ fEventTarget_addEventListener(oAmple_document, "configchange",	function(oEvent) 
 					fEventTarget_dispatchEvent(oDocument_all[sId], oChangeEvent);
 				}
 			// Dispatch localechange event to document
-			fQuery_trigger(fQuery_fromArray([oAmple_document]), "localechange", sLocale);
+			fQuery_trigger(new cQuery(oAmple_document), "localechange", sLocale);
 		}
 //->Debug
 		else
