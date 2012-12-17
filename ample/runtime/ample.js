@@ -439,8 +439,12 @@ fDOMConfiguration_setParameter(oConfiguration, "error-handler", fErrorHandler);
 oAmple.addEventListener("configchange", function (oEvent) {
 	if (oEvent.detail === "enable-textcontent") {
 		if (oAmple.config("enable-textcontent")) {
-			cNode.prototype.getTextContent = fNode_getTextContent;
-			cNode.prototype.setTextContent = fNode_setTextContent;
+			cNode.prototype.getTextContent = function () {
+				return fNode_getTextContent(this);
+			};
+			cNode.prototype.setTextContent = function (sData) {
+				fNode_getTextContent(this, sData);
+			};
 		}
 		else {
 			delete cNode.prototype.getTextContent;
