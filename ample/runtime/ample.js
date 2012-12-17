@@ -416,6 +416,7 @@ fDOMConfiguration_setParameter(oConfiguration, "ample-enable-style", true);
 fDOMConfiguration_setParameter(oConfiguration, "ample-enable-css-hover", true);
 fDOMConfiguration_setParameter(oConfiguration, "ample-enable-guard", true);
 fDOMConfiguration_setParameter(oConfiguration, "ample-enable-transitions", true);
+fDOMConfiguration_setParameter(oConfiguration, "ample-enable-textcontent", false);
 
 //->Debug
 // Enable debugging
@@ -434,3 +435,16 @@ var fErrorHandler	= function(oError) {
 };
 fDOMConfiguration_setParameter(oConfiguration, "error-handler", fErrorHandler);
 //<-Debug
+
+oAmple.addEventListener("configchange", function (oEvent) {
+	if (oEvent.detail === "enable-textcontent") {
+		if (oAmple.config("enable-textcontent")) {
+			cNode.prototype.getTextContent = fNode_getTextContent;
+			cNode.prototype.setTextContent = fNode_setTextContent;
+		}
+		else {
+			delete cNode.prototype.getTextContent;
+			delete cNode.prototype.setTextContent;
+		}
+	}
+});
