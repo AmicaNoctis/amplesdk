@@ -443,7 +443,7 @@ oAmple.addEventListener("configchange", function (oEvent) {
 				return fNode_getTextContent(this);
 			};
 			cNode.prototype.setTextContent = function (sData) {
-				fNode_getTextContent(this, sData);
+				fNode_setTextContent(this, sData);
 			};
 		}
 		else {
