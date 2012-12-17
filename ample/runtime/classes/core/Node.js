@@ -129,7 +129,7 @@ function fNode_setTextContent (oNode, sData) {
 		case cNode.ENTITY_REFERENCE_NODE:
 		case cNode.DOCUMENT_FRAGMENT_NODE:
 			while (oNode.lastChild) oNode.removeChild(oNode.lastChild);
-			oNode.appendChild(fDocument_createTextNode(sData));
+			oNode.appendChild(fDocument_createTextNode(oNode.ownerDocument, sData));
 			break;
 	}
 };
