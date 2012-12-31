@@ -204,15 +204,11 @@ function fDeclareEventMethods (oPrototype, oListeners, aSuspended) {
 	};
 	oPrototype.addEventListener = function (sEventType, fCallback) {
 		var sErr = "Event handler for event type " + sEventType + " must be a function, "
-			+ (
-			typeof fCallback
-			) + " given";
+			+ (typeof fCallback) + " given";
 		if (!oPrototype.hasEventType(sEventType)) {
 			throw new cEventTypeException(sEventType, "register listener");
 		}
-		if (!(
-			fCallback instanceof Function
-			)) {
+		if (!(fCallback instanceof Function)) {
 			throw new Error(sErr);
 		}
 		oListeners[sEventType].push(fCallback);
@@ -600,4 +596,4 @@ oAmple.defineClass = function (sFullName, oConfiguration) {
 		}
 	}
 	aNamespace[0][aNamespace[1]] = cClass;
-}
+};
