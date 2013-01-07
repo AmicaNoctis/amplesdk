@@ -963,9 +963,9 @@
 			<fileset dir="${source.reference.dir}" />
 		</copy>
 		<!-- create index file -->
-		<xslt style="resources/reference/index.xsl"
-			in="${target.reference.dir}/books/ample.xml"
-			out="${target.reference.dir}/books/ample-index.xml"/>
+		<!--<xslt style="resources/reference/index.xsl"-->
+			<!--in="${target.reference.dir}/books/ample.xml"-->
+			<!--out="${target.reference.dir}/books/ample-index.xml"/>-->
 	</target>
 
 	<!-- Licenses -->
