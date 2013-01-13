@@ -110,7 +110,7 @@ function fCreateConstructor (fConstruct, sExtends, oVariables, aEvents, sFullCla
 							this.$parent = cOldParent;
 							return vResult;
 						};
-						fHideMethodBody(oThat[sName], sName, false, bProtected, true);
+						fHideMethodBody(oThat[sName], sName, ["vValue"], false, bProtected, true);
 						oThat[sName].$clsid = sClsKey;
 					}
 					)(sDestinationName, bProtected);
@@ -267,18 +267,31 @@ function fDeclareEventMethods (oPrototype, oListeners, aSuspended) {
 			aSuspended.push(sType);
 		}
 	};
-	fHideMethodBody(oPrototype.hasEventType, "hasEventType", true);
-	fHideMethodBody(oPrototype.addEventListener, "addEventListener", true);
-	fHideMethodBody(oPrototype.removeEventListener, "removeEventListener", true);
-	fHideMethodBody(oPrototype.fireEvent, "fireEvent", true);
-	fHideMethodBody(oPrototype.resumeEvents, "resumeEvents", true);
-	fHideMethodBody(oPrototype.suspendEvents, "suspendEvents", true);
+	fHideMethodBody(oPrototype.hasEventType, "hasEventType", ["sEventType"], true);
+	fHideMethodBody(
+		oPrototype.addEventListener,
+		"addEventListener",
+		["sEventType", "fCallback"],
+		true
+	);
+	fHideMethodBody(
+		oPrototype.removeEventListener,
+		"removeEventListener",
+		["sEventType", "fCallback"],
+		true
+	);
+	fHideMethodBody(oPrototype.fireEvent, "fireEvent", ["sEventType", "vData"], true);
+	fHideMethodBody(oPrototype.resumeEvents, "resumeEvents", [], true);
+	fHideMethodBody(oPrototype.suspendEvents, "suspendEvents", [], true);
 }
 
 function fDeclareMethods (oPrototype, oMethods, sFullClassName, sClsKey, sExtends) {
 	var cParent = fResolve(sExtends),
 		sSourceName,
+		sMethod,
 		sDestinationName,
+		oMatch,
+		aParams,
 		bPrivate,
 		bProtected,
 		bPublic,
@@ -296,6 +309,11 @@ function fDeclareMethods (oPrototype, oMethods, sFullClassName, sClsKey, sExtend
 	};
 	for (sSourceName in oMethods) {
 		if (oMethods.hasOwnProperty(sSourceName)) {
+			sMethod = oMethods[sSourceName] && oMethods[sSourceName].toString
+				? oMethods[sSourceName].toString()
+				: "";
+			oMatch = sMethod.match(/^function\s*\(([^)]*)\)\s*\{/);
+			aParams = oMatch ? oMatch[1].split(/\s*,\s*/) : [];
 			sDestinationName = sSourceName.replace(/^[+#\-]/, "");
 			bPrivate = sSourceName[0] === "-";
 			bProtected = sSourceName[0] === "#";
@@ -325,7 +343,8 @@ function fDeclareMethods (oPrototype, oMethods, sFullClassName, sClsKey, sExtend
 				fHideMethodBody(
 					oPrototype[sDestinationName],
 					sDestinationName,
-					false,
+					aParams,
+					!(bPrivate || bProtected),
 					bProtected
 				);
 			}
@@ -361,12 +380,17 @@ function fDeclarePublicVariables (oPrototype, oVariables) {
 }
 
 function fDeclareStaticMembers (cClass, oMembers) {
-	var sName;
+	var sName, sMethod, oMatch, aParams;
 	for (sName in oMembers) {
 		if (oMembers.hasOwnProperty(sName)) {
 			cClass[sName] = oMembers[sName];
 			if (oMembers instanceof Function) {
-				fHideMethodBody(cClass[sName], sName, true);
+				sMethod = oMethods[sSourceName] && oMethods[sSourceName].toString
+					? oMethods[sSourceName].toString()
+					: "";
+				oMatch = sMethod.match(/^function\s*\(([^)]*)\)\s*\{/);
+				aParams = oMatch ? oMatch[1].split(/\s*,\s*/) : [];
+				fHideMethodBody(cClass[sName], sName, aParams, true);
 			}
 		}
 	}
@@ -387,10 +411,11 @@ function fGenerateUniqueId (sClassName, cParentClass) {
 	return "key:" + (aComponents.join("9") - 0).toString(36);
 }
 
-function fHideMethodBody (fMethod, sName, bPublic, bProteccted, bGetSet) {
+function fHideMethodBody (fMethod, sName, aParams, bPublic, bProteccted, bGetSet) {
 	fMethod.toString = function () {
 		return (bPublic ? "public" : (bProteccted ? "protected" : "private")) + " "
-			+ (bGetSet ? "accessor" : "function") + " " + sName + " () { ... }";
+			+ (bGetSet ? "accessor" : "function") + " " + sName
+			+ " (" + aParams.join(", ") + ") { ... }";
 	};
 	fMethod.toString.toString = null;
 }
