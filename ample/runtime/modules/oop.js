@@ -170,6 +170,8 @@ function fCreateConstructor (fConstruct, sExtends, oVariables, aEvents, sFullCla
 	};
 	hConstructors[sFullClassName].$clsid = sClsKey;
 	cClass.$clsid = sClsKey;
+	cClass.toString = function () { return "class " + sFullClassName; };
+	cClass.toString.toString = null;
 	return cClass;
 }
 
@@ -379,14 +381,14 @@ function fDeclarePublicVariables (oPrototype, oVariables) {
 	}
 }
 
-function fDeclareStaticMembers (cClass, oMembers) {
-	var sName, sMethod, oMatch, aParams;
+function fDeclareStaticMembers (cClass, sExtends, oMembers) {
+	var sName, sMethod, oMatch, aParams, cParent;
 	for (sName in oMembers) {
 		if (oMembers.hasOwnProperty(sName)) {
 			cClass[sName] = oMembers[sName];
-			if (oMembers instanceof Function) {
-				sMethod = oMethods[sSourceName] && oMethods[sSourceName].toString
-					? oMethods[sSourceName].toString()
+			if (oMembers[sName] instanceof Function) {
+				sMethod = oMembers[sName].toString
+					? oMembers[sName].toString()
 					: "";
 				oMatch = sMethod.match(/^function\s*\(([^)]*)\)\s*\{/);
 				aParams = oMatch ? oMatch[1].split(/\s*,\s*/) : [];
@@ -490,6 +492,16 @@ oAmple.defineClass = function (sFullName, oConfiguration) {
 		sFullName,
 		sClsKey
 	);
+	cParent = fResolve(sExtends);
+	if (sExtends !== "Object") {
+		for (sKey in cParent) {
+			if (sKey !== "$clsid" && sKey !== "toString") {
+				if (!oConfiguration.statics || !oConfiguration.statics[sKey]) {
+					cClass[sKey] = cParent[sKey];
+				}
+			}
+		}
+	}
 	for (sKey in oConfiguration) {
 		if (oConfiguration.hasOwnProperty(sKey)) {
 			vValue = oConfiguration[sKey];
@@ -512,7 +524,6 @@ oAmple.defineClass = function (sFullName, oConfiguration) {
 							+ (typeof vValue) + " given";
 						throw new Error(sErr);
 					}
-					cParent = fResolve(vValue);
 					cClass.prototype = new cParent();
 					break;
 				case "statics":
@@ -521,7 +532,7 @@ oAmple.defineClass = function (sFullName, oConfiguration) {
 							+ (typeof vValue) + " given";
 						throw new Error(sErr);
 					}
-					fDeclareStaticMembers(cClass, vValue);
+					fDeclareStaticMembers(cClass, sExtends, vValue);
 					break;
 				case "vars":
 					if (typeof vValue !== "object") {
