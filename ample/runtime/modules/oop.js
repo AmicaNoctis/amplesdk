@@ -213,6 +213,7 @@ function fDeclareEventMethods (oPrototype, oListeners, aSuspended) {
 			aListeners,
 			oEvent,
 			bSuspended;
+		vData = typeof(vData) === "undefined" ? null : vData;
 		if (!oPrototype.hasEventType(sEventType)) {
 			throw new cEventTypeException(sEventType, "fire event");
 		}
@@ -224,7 +225,7 @@ function fDeclareEventMethods (oPrototype, oListeners, aSuspended) {
 		}
 		if (!bSuspended) {
 			aListeners = oListeners[sEventType];
-			oEvent = {type: sEventType, target: oPrototype, data: vData || null};
+			oEvent = {type: sEventType, target: oPrototype, data: vData};
 			for (nIndex = 0, nLength = aListeners.length; nIndex < nLength; nIndex++) {
 				if (aListeners[nIndex] === null) {
 					aListeners.splice(nIndex, 1);
