@@ -1,7 +1,7 @@
-var nClassNumber = 0,
-	hEvents = {},
-	hConstructors = {},
-	aValidKeys = [
+var nClassNumber	= 0,
+	hEvents	= {},
+	hConstructors	= {},
+	aValidKeys	= [
 		"extends",
 		"statics",
 		"construct",
@@ -12,16 +12,16 @@ var nClassNumber = 0,
 
 function cEventTypeException (sType, sAction) {
 	Error.call(this);
-	this.name = "EventTypeException";
-	this.message = "Attempt to " + sAction + " for unsupported event type " + sType;
+	this.name	= "EventTypeException";
+	this.message	= "Attempt to " + sAction + " for unsupported event type " + sType;
 }
 
-cEventTypeException.prototype = Error.prototype;
+cEventTypeException.prototype	= Error.prototype;
 
 function fCheckPermission (oArguments, sName, sFullClassName, sClsKey, bProtected) {
-	var sErr = "Cannot access " + (bProtected ? "protected" : "private")
+	var sErr	= "Cannot access " + (bProtected ? "protected" : "private")
 			+ " method " + sFullClassName + "." + sName + "()",
-		nLimit = 100,
+		nLimit	= 100,
 		fCaller,
 		oMatch,
 		aComponents1,
@@ -38,16 +38,16 @@ function fCheckPermission (oArguments, sName, sFullClassName, sClsKey, bProtecte
 			}
 			else if (bProtected
 				&& fCaller.$clsid
-				&& (oMatch = fCaller.$clsid.match(/^key:([a-z0-9]+)$/))
+				&& (oMatch	= fCaller.$clsid.match(/^key:([a-z0-9]+)$/))
 				) {
-				aComponents1 = ("" + parseInt(oMatch[1], 36)).split("9");
-				aComponents2 = ("" + parseInt(sClsKey.substr(4), 36)).split("9");
-				nLength1 = aComponents1.length;
-				nLength2 = aComponents2.length;
-				bMatching = nLength1 > nLength2;
+				aComponents1	= ("" + parseInt(oMatch[1], 36)).split("9");
+				aComponents2	= ("" + parseInt(sClsKey.substr(4), 36)).split("9");
+				nLength1	= aComponents1.length;
+				nLength2	= aComponents2.length;
+				bMatching	= nLength1 > nLength2;
 				for (nIndex = 0; nIndex < nLength2 && bMatching; nIndex++) {
 					if (aComponents1[nIndex] !== aComponents2[nIndex]) {
-						bMatching = false;
+						bMatching	= false;
 					}
 				}
 				if (bMatching) {
@@ -66,12 +66,12 @@ function fCheckPermission (oArguments, sName, sFullClassName, sClsKey, bProtecte
 }
 
 function fCreateConstructor (fConstruct, sExtends, oVariables, aEvents, sFullClassName, sClsKey) {
-	var cClass = function () {
-		var oThat = this,
-			cParent = fResolve(sExtends),
-			oPrivateVariables = {},
-			oListeners = {},
-			aSuspended = [],
+	var cClass	= function () {
+		var oThat	= this,
+			cParent	= fResolve(sExtends),
+			oPrivateVariables	= {},
+			oListeners	= {},
+			aSuspended	= [],
 			sErr,
 			sSourceName,
 			sDestinationName,
@@ -80,107 +80,112 @@ function fCreateConstructor (fConstruct, sExtends, oVariables, aEvents, sFullCla
 			sType,
 			bPrivate,
 			bProtected;
-		this.$parent = cParent.prototype;
+		this.$parent	= cParent.prototype;
 		for (sSourceName in oVariables) {
 			if (oVariables.hasOwnProperty(sSourceName)) {
-				sDestinationName = sSourceName.replace(/^[+#\-]/, "");
-				bPrivate = sSourceName[0] === "-";
-				bProtected = sSourceName[0] === "#";
+				sDestinationName	= sSourceName.replace(/^[+#\-]/, "");
+				bPrivate	= sSourceName[0] === "-";
+				bProtected	= sSourceName[0] === "#";
 				if (bPrivate || bProtected) {
-					if (typeof oVariables[sSourceName] === "object" && oVariables[sSourceName] !== null
+					if (typeof oVariables[sSourceName] === "object"
+						&& oVariables[sSourceName] !== null
 						|| oVariables[sSourceName] instanceof Function
 						) {
-						sErr = (bProtected ? "Protected" : "Private")
-							+ " variable " + sDestinationName + " must be an atomic value";
+						sErr	= (bProtected ? "Protected" : "Private") + " variable "
+							+ sDestinationName + " must be an atomic value";
 						throw new Error(sErr);
 					}
-					oPrivateVariables[sDestinationName] = oVariables[sSourceName];
+					oPrivateVariables[sDestinationName]	= oVariables[sSourceName];
 					(function (sName, bProtected) {
-						oThat[sName] = function (vValue) {
-							var cOldParent = this.$parent,
+						oThat[sName]	= function (vValue) {
+							var cOldParent	= this.$parent,
 								vResult;
 							fCheckPermission(arguments, sName, sFullClassName, sClsKey, bProtected);
-							this.$parent = cParent.prototype;
+							this.$parent	= cParent.prototype;
 							if (typeof vValue === "undefined") {
-								vResult = oPrivateVariables[sName];
+								vResult	= oPrivateVariables[sName];
 							}
 							else {
-								oPrivateVariables[sName] = vValue;
+								oPrivateVariables[sName]	= vValue;
 							}
-							this.$parent = cOldParent;
+							this.$parent	= cOldParent;
 							return vResult;
 						};
 						fHideMethodBody(oThat[sName], sName, ["vValue"], false, bProtected, true);
-						oThat[sName].$clsid = sClsKey;
+						oThat[sName].$clsid	= sClsKey;
 					}
 					)(sDestinationName, bProtected);
 				}
 			}
 		}
 		if (!(aEvents instanceof Array)) {
-			sErr = "The events property must be an array of strings";
+			sErr	= "The events property must be an array of strings";
 			throw new Error(sErr);
 		}
 		for (nIndex = 0, nLength = aEvents.length; nIndex < nLength; nIndex++) {
-			sType = typeof aEvents[nIndex];
+			sType	= typeof aEvents[nIndex];
 			if (sType !== "string") {
-				sErr = String(nIndex + 1);
+				sErr	= String(nIndex + 1);
 				switch (nIndex % 10) {
 					case 0:
-						sErr += "st";
+						sErr	+= "st";
 						break;
 					case 1:
-						sErr += "nd";
+						sErr	+= "nd";
 						break;
 					case 2:
-						sErr += "rd";
+						sErr	+= "rd";
 						break;
 					default:
-						sErr += "th";
+						sErr	+= "th";
 				}
-				sErr += " event type must be a string, " + sType + " given";
+				sErr	+= " event type must be a string, " + sType + " given";
 				throw new Error(sErr);
 			}
-			oListeners[aEvents[nIndex]] = [];
+			oListeners[aEvents[nIndex]]	= [];
 		}
 		if (hEvents[sExtends]) {
 			for (nIndex = 0, nLength = hEvents[sExtends].length; nIndex < nLength; nIndex++) {
 				aEvents.push(hEvents[sExtends][nIndex]);
-				oListeners[hEvents[sExtends][nIndex]] = [];
+				oListeners[hEvents[sExtends][nIndex]]	= [];
 			}
 		}
 		if (aEvents.length) {
 			fDeclareEventMethods(this, oListeners, aSuspended);
 		}
-		this.toString = function () {
-			return "[object " + sFullClassName + "]";
-		};
-		this.toString.toString = null;
+		this.toString   = (function (fMethod) {
+			return function () {
+				var sText   = fMethod ? fMethod.call(this) : sFullClassName;
+				sText = sText.match(/^\[.+\]$/) ? sFullClassName : sText;
+				return "[object " + sText + "]";
+			}
+		})(this.toString);
+		this.toString.toString	= null;
 		hConstructors[sFullClassName](this, arguments);
 	};
-	hEvents[sFullClassName] = aEvents;
-	hConstructors[sFullClassName] = function (oThis, aArguments) {
-		oThis.$base = function () {
+	hEvents[sFullClassName]	= aEvents;
+	hConstructors[sFullClassName]	= function (oThis, aArguments) {
+		oThis.$base	= function () {
 			hConstructors[sExtends]
 				? hConstructors[sExtends](oThis, arguments)
 				: fResolve(sExtends).apply(oThis, arguments);
 		};
-		oThis.$base.$clsid = sClsKey;
+		oThis.$base.$clsid	= sClsKey;
 		fConstruct.apply(oThis, aArguments);
 	};
-	hConstructors[sFullClassName].$clsid = sClsKey;
-	cClass.$clsid = sClsKey;
-	cClass.toString = function () { return "class " + sFullClassName; };
-	cClass.toString.toString = null;
+	hConstructors[sFullClassName].$clsid	= sClsKey;
+	cClass.$clsid	= sClsKey;
+	cClass.toString	= function () { return "class " + sFullClassName; };
+	cClass.toString.toString	= null;
 	return cClass;
 }
 
 function fDeclareEventMethods (oPrototype, oListeners, aSuspended) {
-	oPrototype.hasEventType = function (sEventType) {
+	oPrototype.hasEventType	= function (sEventType) {
 		return oListeners[sEventType] !== undefined;
 	};
-	oPrototype.addEventListener = function (sEventType, fCallback) {
-		var sErr = "Event handler for event type " + sEventType + " must be a function, "
+	oPrototype.addEventListener	= function (sEventType, fCallback) {
+		var sErr	= "Event handler for event type " + sEventType + " must be a function, "
 			+ (typeof fCallback) + " given";
 		if (!oPrototype.hasEventType(sEventType)) {
 			throw new cEventTypeException(sEventType, "register listener");
@@ -191,41 +196,41 @@ function fDeclareEventMethods (oPrototype, oListeners, aSuspended) {
 		oListeners[sEventType].push(fCallback);
 		return fCallback;
 	};
-	oPrototype.removeEventListener = function (sEventType, fCallback) {
+	oPrototype.removeEventListener	= function (sEventType, fCallback) {
 		var nIndex,
 			nLength,
 			aListeners;
 		if (!oPrototype.hasEventType(sEventType)) {
 			throw new cEventTypeException(sEventType, "unregister listener");
 		}
-		aListeners = oListeners[sEventType];
+		aListeners	= oListeners[sEventType];
 		for (nIndex = 0, nLength = aListeners.length; nIndex < nLength; nIndex++) {
 			if (aListeners[nIndex] === fCallback) {
-				aListeners[nIndex] = null;
+				aListeners[nIndex]	= null;
 				return fCallback;
 			}
 		}
 		return null;
 	};
-	oPrototype.fireEvent = function (sEventType, vData) {
+	oPrototype.fireEvent	= function (sEventType, vData) {
 		var nIndex,
 			nLength,
 			aListeners,
 			oEvent,
 			bSuspended;
-		vData = typeof(vData) === "undefined" ? null : vData;
+		vData	= typeof(vData) === "undefined" ? null : vData;
 		if (!oPrototype.hasEventType(sEventType)) {
 			throw new cEventTypeException(sEventType, "fire event");
 		}
 		for (nIndex = 0, nLength = aSuspended.length; nIndex < nLength; nIndex++) {
 			if (aSuspended[nIndex] === sEventType) {
-				bSuspended = true;
+				bSuspended	= true;
 				break;
 			}
 		}
 		if (!bSuspended) {
-			aListeners = oListeners[sEventType];
-			oEvent = {type: sEventType, target: oPrototype, data: vData};
+			aListeners	= oListeners[sEventType];
+			oEvent	= {type: sEventType, target: oPrototype, data: vData};
 			for (nIndex = 0, nLength = aListeners.length; nIndex < nLength; nIndex++) {
 				if (aListeners[nIndex] === null) {
 					aListeners.splice(nIndex, 1);
@@ -238,14 +243,14 @@ function fDeclareEventMethods (oPrototype, oListeners, aSuspended) {
 			}
 		}
 	};
-	oPrototype.resumeEvents = function () {
+	oPrototype.resumeEvents	= function () {
 		var nIndex1,
 			nIndex2,
 			nLength1,
 			nLength2,
 			sType;
 		for (nIndex1 = 0, nLength1 = arguments.length; nIndex1 < nLength1; nIndex1++) {
-			sType = arguments[nIndex1];
+			sType	= arguments[nIndex1];
 			if (!oPrototype.hasEventType(sType)) {
 				throw new cEventTypeException(sType, "resume listeners");
 			}
@@ -258,12 +263,12 @@ function fDeclareEventMethods (oPrototype, oListeners, aSuspended) {
 			}
 		}
 	};
-	oPrototype.suspendEvents = function () {
+	oPrototype.suspendEvents	= function () {
 		var nIndex,
 			nLength,
 			sType;
 		for (nIndex = 0, nLength = arguments.length; nIndex < nLength; nIndex++) {
-			sType = arguments[nIndex];
+			sType	= arguments[nIndex];
 			if (!oPrototype.hasEventType(sType)) {
 				throw cEventTypeException(sType, "suspend listeners");
 			}
@@ -289,7 +294,7 @@ function fDeclareEventMethods (oPrototype, oListeners, aSuspended) {
 }
 
 function fDeclareMethods (oPrototype, oMethods, sFullClassName, sClsKey, sExtends) {
-	var cParent = fResolve(sExtends),
+	var cParent	= fResolve(sExtends),
 		sSourceName,
 		sMethod,
 		sDestinationName,
@@ -299,34 +304,35 @@ function fDeclareMethods (oPrototype, oMethods, sFullClassName, sClsKey, sExtend
 		bProtected,
 		bPublic,
 		sErr;
-	oMethods["#$grant"] = function (fFunction) {
-		var fWrapper = function () {
+	oMethods["#$grant"]	= function (fFunction) {
+		var fWrapper	= function () {
 			return fFunction.apply(this, arguments);
 		};
-		fWrapper.$granted = true;
-		fWrapper.toString = function () {
+		fWrapper.$granted	= true;
+		fWrapper.toString	= function () {
 			return "public privileged function () { ... }";
 		};
-		fWrapper.toString.toString = null;
+		fWrapper.toString.toString	= null;
 		return fWrapper;
 	};
 	for (sSourceName in oMethods) {
 		if (oMethods.hasOwnProperty(sSourceName)) {
-			sMethod = oMethods[sSourceName] && oMethods[sSourceName].toString
+			sMethod	= oMethods[sSourceName] && oMethods[sSourceName].toString
 				? oMethods[sSourceName].toString()
 				: "";
-			oMatch = sMethod.match(/^function\s*\(([^)]*)\)\s*\{/);
-			aParams = oMatch ? oMatch[1].split(/\s*,\s*/) : [];
-			sDestinationName = sSourceName.replace(/^[+#\-]/, "");
-			bPrivate = sSourceName[0] === "-";
-			bProtected = sSourceName[0] === "#";
+			oMatch	= sMethod.match(/^function\s*\(([^)]*)\)\s*\{/);
+			aParams	= oMatch ? oMatch[1].split(/\s*,\s*/) : [];
+			sDestinationName	= sSourceName.replace(/^[+#\-]/, "");
+			bPrivate	= sSourceName[0] === "-";
+			bProtected	= sSourceName[0] === "#";
 			if (!(oMethods[sSourceName] instanceof Function)) {
-				sErr = "Method " + sFullClassName + "." + sDestinationName + " must be a function";
+				sErr	= "Method " + sFullClassName + "." + sDestinationName
+					+ " must be a function";
 				throw new Error(sErr);
 			}
 			(function (sSourceName, sDestinationName, bPrivate, bProtected) {
-				oPrototype[sDestinationName] = function () {
-					var cOldParent = this.$parent,
+				oPrototype[sDestinationName]	= function () {
+					var cOldParent	= this.$parent,
 						vResult;
 					if (bPrivate || bProtected) {
 						fCheckPermission(
@@ -337,12 +343,12 @@ function fDeclareMethods (oPrototype, oMethods, sFullClassName, sClsKey, sExtend
 							bProtected
 						);
 					}
-					this.$parent = cParent.prototype;
-					vResult = oMethods[sSourceName].apply(this, arguments);
-					this.$parent = cOldParent;
+					this.$parent	= cParent.prototype;
+					vResult	= oMethods[sSourceName].apply(this, arguments);
+					this.$parent	= cOldParent;
 					return vResult;
 				};
-				oPrototype[sDestinationName].$clsid = sClsKey;
+				oPrototype[sDestinationName].$clsid	= sClsKey;
 				fHideMethodBody(
 					oPrototype[sDestinationName],
 					sDestinationName,
@@ -365,18 +371,18 @@ function fDeclarePublicVariables (oPrototype, oVariables) {
 		bPublic;
 	for (sSourceName in oVariables) {
 		if (oVariables.hasOwnProperty(sSourceName)) {
-			sDestinationName = sSourceName.replace(/^[+#\-]/, "");
-			bPrivate = sSourceName[0] === "-";
-			bProtected = sSourceName[0] === "#";
-			bPublic = !bPrivate && !bProtected;
+			sDestinationName	= sSourceName.replace(/^[+#\-]/, "");
+			bPrivate	= sSourceName[0] === "-";
+			bProtected	= sSourceName[0] === "#";
+			bPublic	= !bPrivate && !bProtected;
 			if (bPublic) {
 				if (typeof oVariables[sSourceName] === "object" && oVariables[sSourceName] !== null
 					|| oVariables[sSourceName] instanceof Function
 					) {
-					sErr = "Public variable " + sDestinationName + " must be an atomic value";
+					sErr	= "Public variable " + sDestinationName + " must be an atomic value";
 					throw new Error(sErr);
 				}
-				oPrototype[sDestinationName] = oVariables[sSourceName];
+				oPrototype[sDestinationName]	= oVariables[sSourceName];
 			}
 		}
 	}
@@ -386,13 +392,13 @@ function fDeclareStaticMembers (cClass, sExtends, oMembers) {
 	var sName, sMethod, oMatch, aParams, cParent;
 	for (sName in oMembers) {
 		if (oMembers.hasOwnProperty(sName)) {
-			cClass[sName] = oMembers[sName];
+			cClass[sName]	= oMembers[sName];
 			if (oMembers[sName] instanceof Function) {
-				sMethod = oMembers[sName].toString
+				sMethod	= oMembers[sName].toString
 					? oMembers[sName].toString()
 					: "";
-				oMatch = sMethod.match(/^function\s*\(([^)]*)\)\s*\{/);
-				aParams = oMatch ? oMatch[1].split(/\s*,\s*/) : [];
+				oMatch	= sMethod.match(/^function\s*\(([^)]*)\)\s*\{/);
+				aParams	= oMatch ? oMatch[1].split(/\s*,\s*/) : [];
 				fHideMethodBody(cClass[sName], sName, aParams, true);
 			}
 		}
@@ -400,45 +406,45 @@ function fDeclareStaticMembers (cClass, sExtends, oMembers) {
 }
 
 function fGenerateUniqueId (sClassName, cParentClass) {
-	var nId = nClassNumber++,
+	var nId	= nClassNumber++,
 		aComponents,
 		nKey,
 		oMatch;
-	if (cParentClass.$clsid && (oMatch = cParentClass.$clsid.match(/^key:([a-z0-9]+)$/))) {
-		aComponents = ("" + parseInt(oMatch[1], 36)).split("9");
+	if (cParentClass.$clsid && (oMatch	= cParentClass.$clsid.match(/^key:([a-z0-9]+)$/))) {
+		aComponents	= ("" + parseInt(oMatch[1], 36)).split("9");
 	}
 	else {
-		aComponents = [Math.floor(Math.random() * 1000000).toString(9)];
+		aComponents	= [Math.floor(Math.random() * 1000000).toString(9)];
 	}
 	aComponents.push(nId.toString(9));
 	return "key:" + (aComponents.join("9") - 0).toString(36);
 }
 
 function fHideMethodBody (fMethod, sName, aParams, bPublic, bProteccted, bGetSet) {
-	fMethod.toString = function () {
+	fMethod.toString	= function () {
 		return (bPublic ? "public" : (bProteccted ? "protected" : "private")) + " "
 			+ (bGetSet ? "accessor" : "function") + " " + sName
 			+ " (" + aParams.join(", ") + ") { ... }";
 	};
-	fMethod.toString.toString = null;
+	fMethod.toString.toString	= null;
 }
 
 function fResolve (sFullName, bCreate) {
-	var aNames = sFullName.split("."),
-		oCurrent = window,
-		nLength = aNames.length - (bCreate ? 1 : 0),
-		sErr = sFullName + " is not defined",
+	var aNames	= sFullName.split("."),
+		oCurrent	= window,
+		nLength	= aNames.length - (bCreate ? 1 : 0),
+		sErr	= sFullName + " is not defined",
 		nIndex;
 	for (nIndex = 0; nIndex < nLength; nIndex++) {
 		if (!oCurrent[aNames[nIndex]]) {
 			if (bCreate) {
-				oCurrent[aNames[nIndex]] = {};
+				oCurrent[aNames[nIndex]]	= {};
 			}
 			else {
 				throw new Error(sErr);
 			}
 		}
-		oCurrent = oCurrent[aNames[nIndex]];
+		oCurrent	= oCurrent[aNames[nIndex]];
 	}
 	return bCreate ? [oCurrent, aNames[nLength]] : oCurrent;
 }
@@ -453,7 +459,7 @@ function fResolve (sFullName, bCreate) {
  * @param {String[]} [oConfiguration.events] An array of event type names available. If non-empty, the methods hasEventType(type:string):boolean, addEventListener(type:string,callback:function):function, removeEventListener(type:string,callback:function):function|null, fireEvent(type:string,data:mixed), suspendEvents(types...:string), resumeEvents(types...:string).
  * @param {Object} [oConfiguration.methods] Methods of the class, private methods are prefixed with a dash, but invoked without any prefix.
  */
-oAmple.defineClass = function (sFullName, oConfiguration) {
+oAmple.defineClass	= function (sFullName, oConfiguration) {
 	var sClsKey,
 		aNamespace,
 		sKey,
@@ -469,23 +475,23 @@ oAmple.defineClass = function (sFullName, oConfiguration) {
 		["fullName", String],
 		["configuration", Object]
 	]);
-	aNamespace = fResolve(sFullName, true);
-	sExtends = typeof oConfiguration["extends"] === "string"
+	aNamespace	= fResolve(sFullName, true);
+	sExtends	= typeof oConfiguration["extends"] === "string"
 		? oConfiguration["extends"]
 		: "Object";
-	fConstruct = oConfiguration.construct instanceof Function
+	fConstruct	= oConfiguration.construct instanceof Function
 		? oConfiguration.construct
 		: function () {
 		this.$base.apply(this, arguments);
 	};
-	oVariables = typeof oConfiguration.vars === "object"
+	oVariables	= typeof oConfiguration.vars === "object"
 		? oConfiguration.vars
 		: {};
-	aEvents = oConfiguration.events instanceof Array
+	aEvents	= oConfiguration.events instanceof Array
 		? oConfiguration.events
 		: [];
-	sClsKey = fGenerateUniqueId(sFullName, fResolve(sExtends));
-	cClass = fCreateConstructor(
+	sClsKey	= fGenerateUniqueId(sFullName, fResolve(sExtends));
+	cClass	= fCreateConstructor(
 		fConstruct,
 		sExtends,
 		oVariables,
@@ -493,43 +499,43 @@ oAmple.defineClass = function (sFullName, oConfiguration) {
 		sFullName,
 		sClsKey
 	);
-	cParent = fResolve(sExtends);
+	cParent	= fResolve(sExtends);
 	if (sExtends !== "Object") {
 		for (sKey in cParent) {
 			if (sKey !== "$clsid" && sKey !== "toString") {
 				if (!oConfiguration.statics || !oConfiguration.statics[sKey]) {
-					cClass[sKey] = cParent[sKey];
+					cClass[sKey]	= cParent[sKey];
 				}
 			}
 		}
 	}
 	for (sKey in oConfiguration) {
 		if (oConfiguration.hasOwnProperty(sKey)) {
-			vValue = oConfiguration[sKey];
+			vValue	= oConfiguration[sKey];
 			switch (sKey) {
 				case "construct":
 					if (!(vValue instanceof Function)) {
-						sErr = "Constructor must be a function, " + (typeof vValue) + " given";
+						sErr	= "Constructor must be a function, " + (typeof vValue) + " given";
 						throw new Error(sErr);
 					}
 					break;
 				case "events":
 					if (!(vValue instanceof Array)) {
-						sErr = "Event types must be an array, " + (typeof vValue) + " given";
+						sErr	= "Event types must be an array, " + (typeof vValue) + " given";
 						throw new Error(sErr);
 					}
 					break;
 				case "extends":
 					if (typeof vValue !== "string") {
-						sErr = "Parent class must be specified as string, "
+						sErr	= "Parent class must be specified as string, "
 							+ (typeof vValue) + " given";
 						throw new Error(sErr);
 					}
-					cClass.prototype = new cParent();
+					cClass.prototype	= new cParent();
 					break;
 				case "statics":
 					if (typeof vValue !== "object") {
-						sErr = "Static members must be specified as object literal, "
+						sErr	= "Static members must be specified as object literal, "
 							+ (typeof vValue) + " given";
 						throw new Error(sErr);
 					}
@@ -537,7 +543,7 @@ oAmple.defineClass = function (sFullName, oConfiguration) {
 					break;
 				case "vars":
 					if (typeof vValue !== "object") {
-						sErr = "Member variables must be specified as object literal, "
+						sErr	= "Member variables must be specified as object literal, "
 							+ (typeof vValue) + " given";
 						throw new Error(sErr);
 					}
@@ -545,18 +551,18 @@ oAmple.defineClass = function (sFullName, oConfiguration) {
 					break;
 				case "methods":
 					if (typeof vValue !== "object") {
-						sErr = "Methods must be specified as object literal, "
+						sErr	= "Methods must be specified as object literal, "
 							+ (typeof vValue) + " given";
 						throw new Error(sErr);
 					}
 					fDeclareMethods(cClass.prototype, vValue, sFullName, sClsKey, sExtends);
 					break;
 				default:
-					sErr = "Key " + sKey + " is not supported. " + "Valid keys are "
+					sErr	= "Key " + sKey + " is not supported. " + "Valid keys are "
 						+ aValidKeys.join(", ");
 					throw new Error(sErr);
 			}
 		}
 	}
-	aNamespace[0][aNamespace[1]] = cClass;
+	aNamespace[0][aNamespace[1]]	= cClass;
 };
